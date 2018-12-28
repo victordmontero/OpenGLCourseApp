@@ -32,14 +32,9 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shaders\fragment.shader" />
-    <None Include="Shaders\shader.frag" />
-    <None Include="Shaders\shader.vert" />
-    <None Include="Shaders\vertex.shader" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
