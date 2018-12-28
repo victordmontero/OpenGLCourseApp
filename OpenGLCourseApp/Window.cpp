@@ -4,8 +4,10 @@ Window::Window()
 {
 	width = 800;
 	height = 600;
+	xChange = 0.0f;
+	yChange = 0.0f;
 
-	for(size_t i = 0; i < 1024; i++)
+	for (size_t i = 0; i < 1024; i++)
 	{
 		keys[i] = 0;
 	}
@@ -15,6 +17,8 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 {
 	width = windowWidth;
 	height = windowHeight;
+	xChange = 0.0f;
+	yChange = 0.0f;
 
 	for (size_t i = 0; i < 1024; i++)
 	{
@@ -77,12 +81,52 @@ int Window::Initialise()
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	glfwSetWindowUserPointer(mainWindow, this);
+	glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, this);
 }
 
 void Window::createCallbacks()
 {
 	glfwSetKeyCallback(mainWindow, handleKeys);
 	glfwSetCursorPosCallback(mainWindow, handleMouse);
+	glfwSetJoystickCallback(handleJoystickConnected);
+}
+
+const unsigned char* Window::getButtons()
+{
+	const unsigned char* buttons = NULL;;
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+	{
+		int buttonCount = 0;
+		int stickCount = 0;
+
+		buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+
+		if (buttons[GLFW_GAMEPAD_BUTTON_CROSS] == GLFW_PRESS)
+		{
+			glfwSetWindowShouldClose(mainWindow, GL_TRUE);
+		}
+		/*for (int i = 0; i < buttonCount; i++)
+		{
+			printf("button %d is %d\n", i, buttons[i]);
+		}
+		printf("\n");*/
+	}
+	return buttons;
+}
+
+const float* Window::getAxes()
+{
+	int axesCount;
+	axes = NULL;;
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+	{
+		axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+		/*for (int i = 0; i < axesCount; i++)
+		{
+			printf("axe %d is %.3f\n", i, axes[i]);
+		}*/
+	}
+	return axes;
 }
 
 GLfloat Window::getXChange()
@@ -137,6 +181,47 @@ void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
 
 	theWindow->lastX = xPos;
 	theWindow->lastY = yPos;
+}
+
+void Window::pollJoystickAxes()
+{
+	if (axes == NULL)
+		return;
+
+	if (joystickFirstMoved)
+	{
+		xChange = 0.0f;
+		yChange = 0.0f;
+		joystickFirstMoved = false;
+	}
+
+	float axisX = axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
+	float axisY = axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+
+	xChange = fabsf(axisX) > fabsf(0.5f) ? axisX*0.08f : 0;
+	yChange = fabsf(axisY) > fabsf(0.5f) ? axisY*0.08f : 0;
+
+}
+
+void Window::handleJoystickConnected(int joy, int event)
+{
+	if (glfwJoystickPresent(joy))
+	{
+		Window* window = static_cast<Window*>(glfwGetJoystickUserPointer(joy));
+	}
+
+	if (event == GLFW_CONNECTED)
+	{
+		printf("Joystick %s[%d] connected\n", glfwGetJoystickName(joy), joy);
+	}
+	else if (event == GLFW_DISCONNECTED)
+	{
+		printf("Joystick %s[%d] disconnected\n", glfwGetJoystickName(joy), joy);
+	}
+	else
+	{
+		printf("Joystick event %d\n", event);
+	}
 }
 
 Window::~Window()

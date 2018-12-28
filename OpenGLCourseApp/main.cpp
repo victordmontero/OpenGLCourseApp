@@ -100,7 +100,11 @@ int main()
 		glfwPollEvents();
 
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+		//system("CLS");
+		camera.joyStickControl(mainWindow.getButtons(), mainWindow.getAxes(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+		
+		mainWindow.pollJoystickAxes();
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

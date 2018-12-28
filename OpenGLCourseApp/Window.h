@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdio.h"
+#include <cmath>
 
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
@@ -20,8 +21,12 @@ public:
 	bool getShouldClose() { return glfwWindowShouldClose(mainWindow); }
 
 	bool* getsKeys() { return keys; }
+	const unsigned char* getButtons();
+	const float* getAxes();
 	GLfloat getXChange();
 	GLfloat getYChange();
+
+	void pollJoystickAxes();
 
 	void swapBuffers() { glfwSwapBuffers(mainWindow); }
 
@@ -34,14 +39,17 @@ private:
 	GLint bufferWidth, bufferHeight;
 
 	bool keys[1024];
+	const float* axes;
 
 	GLfloat lastX;
 	GLfloat lastY;
 	GLfloat xChange;
 	GLfloat yChange;
 	bool mouseFirstMoved;
+	bool joystickFirstMoved;
 
 	void createCallbacks();
 	static void handleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 	static void handleMouse(GLFWwindow* window, double xPos, double yPos);
+	static void handleJoystickConnected(int joy, int event);
 };

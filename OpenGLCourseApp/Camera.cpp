@@ -41,6 +41,58 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 	}
 }
 
+void Camera::joyStickControl(const unsigned char* buttons, const float* axes, GLfloat deltaTime)
+{
+
+	if (buttons == NULL)
+		return;
+
+	GLfloat velocity = moveSpeed * deltaTime;
+
+	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] == GLFW_PRESS)
+	{
+		position += front * velocity;
+	}
+
+	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] == GLFW_PRESS)
+	{
+		position -= front * velocity;
+	}
+
+	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] == GLFW_PRESS)
+	{
+		position -= right * velocity;
+	}
+
+	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] == GLFW_PRESS)
+	{
+		position += right * velocity;
+	}
+
+	if (axes == NULL)
+		return;
+
+	if (axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.5f)
+	{
+		position += front * velocity;
+	}
+
+	if (axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.5f)
+	{
+		position -= front * velocity;
+	}
+
+	if (axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.5f)
+	{
+		position -= right * velocity;
+	}
+
+	if (axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.5f)
+	{
+		position += right * velocity;
+	}
+}
+
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 {
 	xChange *= turnSpeed;
