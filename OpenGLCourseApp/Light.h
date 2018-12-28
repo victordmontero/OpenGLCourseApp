@@ -6,15 +6,20 @@
 class Light
 {
 public:
-	/*Light();*/
-	Light(GLfloat red=1.0f, GLfloat green = 1.0f, GLfloat blue = 1.0f, GLfloat intensity = 1.0f);
+	Light();
+	Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat intensity,
+		GLfloat xdir, GLfloat ydir, GLfloat zdir, GLfloat dIntensity);
 
-	virtual void UseLight(GLfloat ambientIntensityLoc,GLfloat ambientColorLoc);
+	virtual void UseLight(GLfloat ambientIntensityLoc, GLfloat ambientColorLoc,
+		GLfloat diffuseIntensityLoc, GLfloat directionLoc);
 
 	~Light();
 
 private:
 	glm::vec3 color;
 	GLfloat ambientIntensity;
+
+	glm::vec3 direction;
+	GLfloat diffuseIntensity;
 };
 
