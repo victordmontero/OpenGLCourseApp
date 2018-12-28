@@ -17,6 +17,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Light.h"
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -28,14 +29,16 @@ Camera camera;
 Texture brickTexture;
 Texture dirtTexture;
 
+Light ambientLight;
+
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
 
 // Vertex Shader
-static const char* vShader = "Shaders/shader.vert";
+static const char* vShader = "Shaders/vertex.shader";
 
 // Fragment Shader
-static const char* fShader = "Shaders/shader.frag";
+static const char* fShader = "Shaders/fragment.shader";
 
 void CreateObjects()
 {
@@ -85,8 +88,9 @@ int main()
 	dirtTexture = Texture("Textures/dirt.png");
 	dirtTexture.LoadTexture();
 
+	ambientLight = Light(1.0f, 0.0f, 1.0f, 1.0f);
 
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientIntensity = 0, uniformAmbientColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
 	// Loop until window closed
@@ -103,7 +107,7 @@ int main()
 		//system("CLS");
 		camera.joyStickControl(mainWindow.getButtons(), mainWindow.getAxes(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
-		
+
 		mainWindow.pollJoystickAxes();
 
 		// Clear the window
@@ -114,6 +118,11 @@ int main()
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
+		uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
+		uniformAmbientColor = shaderList[0].GetAmbientColorLocation();
+
+
+		ambientLight.UseLight(uniformAmbientIntensity, uniformAmbientColor);
 
 		glm::mat4 model(1.0f);
 
