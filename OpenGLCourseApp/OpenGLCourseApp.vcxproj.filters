@@ -64,4 +64,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\fragment.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\vertex.shader">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>
