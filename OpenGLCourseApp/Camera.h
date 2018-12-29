@@ -17,6 +17,9 @@ public:
 	void joyStickControl(const unsigned char* buttons, const float* axes, GLfloat deltaTime);
 	void mouseControl(GLfloat xChange, GLfloat yChange);
 
+
+	glm::vec3 getCameraPosition();
+
 	glm::mat4 calculateViewMatrix();
 
 	~Camera();
