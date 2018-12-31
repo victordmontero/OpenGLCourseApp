@@ -6,7 +6,7 @@ class DirectionalLight : public Light
 {
 public:
 	DirectionalLight();
-	virtual ~DirectionalLight();
+	~DirectionalLight();
 
 	DirectionalLight(GLfloat red, GLfloat green, GLfloat blue,
 		GLfloat intensity, GLfloat dIntensity,

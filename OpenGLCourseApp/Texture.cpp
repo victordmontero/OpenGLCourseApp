@@ -7,6 +7,7 @@ Texture::Texture()
 	textureId = 0;
 	width = 0;
 	height = 0;
+	bitDepth = 0;
 	fileLocation = "";
 }
 
@@ -15,7 +16,7 @@ Texture::Texture(char* fileLoc)
 	textureId = 0;
 	width = 0;
 	height = 0;
-
+	bitDepth = 0;
 	fileLocation = fileLoc;
 }
 
@@ -30,7 +31,8 @@ void Texture::LoadTexture()
 	unsigned char* data = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
 	if (!data)
 	{
-		printf("Failed to load data from %s\n", fileLocation);
+		printf("Failed to find: %s\n", fileLocation);
+		return;
 	}
 
 	glGenTextures(1, &textureId);
@@ -59,5 +61,6 @@ void Texture::ClearTexture()
 	textureId = 0;
 	width = 0;
 	height = 0;
+	bitDepth = 0;
 	fileLocation = "";
 }
