@@ -25,8 +25,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="OmniShadowMap.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -38,15 +41,23 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="OmniShadowMap.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\directional_shadow_fragment.shader" />
+    <None Include="Shaders\directional_shadow_vertex.shader" />
     <None Include="Shaders\fragment.shader" />
+    <None Include="Shaders\omni_shadow_map_fragment.shader" />
+    <None Include="Shaders\omni_shadow_map_geometry.shader" />
+    <None Include="Shaders\omni_shadow_map_vertex.shader" />
     <None Include="Shaders\vertex.shader" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -106,12 +117,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\vmontero\Documents\PersonalProj\glm-stable;C:\Users\vmontero\Documents\PersonalProj\glfw-master\include;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vmontero\Documents\PersonalProj\glm-stable;C:\Users\vmontero\Documents\PersonalProj\glfw-master\include;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\include;C:\Users\vmontero\Documents\PersonalProj\assimp-4.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\vmontero\Documents\PersonalProj\glfw-master\lib\Release;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\vmontero\Documents\PersonalProj\glfw-master\lib\Release;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\lib\Release\Win32;C:\Users\vmontero\Documents\PersonalProj\assimp-4.1.0\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,12 +130,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\vmontero\Documents\PersonalProj\glm-stable;C:\Users\vmontero\Documents\PersonalProj\glfw-master\include;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vmontero\Documents\PersonalProj\glm-stable;C:\Users\vmontero\Documents\PersonalProj\glfw-master\include;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\include;C:\Users\vmontero\Documents\PersonalProj\assimp-4.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\vmontero\Documents\PersonalProj\glfw-master\lib\Release;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\vmontero\Documents\PersonalProj\glfw-master\lib\Release;C:\Users\vmontero\Documents\PersonalProj\glew-2.1.0\lib\Release\Win32;C:\Users\vmontero\Documents\PersonalProj\assimp-4.1.0\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

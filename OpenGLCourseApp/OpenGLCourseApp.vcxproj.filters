@@ -52,6 +52,15 @@
     <ClCompile Include="SpotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OmniShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -90,12 +99,36 @@
     <ClInclude Include="SpotLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OmniShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\fragment.shader">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\vertex.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\directional_shadow_fragment.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\directional_shadow_vertex.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\omni_shadow_map_vertex.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\omni_shadow_map_fragment.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\omni_shadow_map_geometry.shader">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
