@@ -2,7 +2,7 @@
 
 #include<cstring>
 #include <GL/glew.h>
-#include "stb_image.h"
+#include "CommonDefs.h"
 
 class Texture
 {
