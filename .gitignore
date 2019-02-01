@@ -1,6 +1,3 @@
-# Assets
-!Models/
-
 # Prerequisites
 *.d
 
@@ -376,3 +373,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database 
 healthchecksdb
+
+# Assets
+!Models/*.obj
