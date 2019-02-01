@@ -1,5 +1,7 @@
 ## OpenGL Course App
 
+Code of the Udemy Course [Computer Graphics with Modern OpenGL and C++](https://www.udemy.com/graphics-with-modern-opengl/)
+
 - To Build:
 1. Install GLFW
 1. Install GLEW
