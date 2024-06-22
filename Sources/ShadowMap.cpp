@@ -1,5 +1,9 @@
 #include "ShadowMap.h"
 
+extern "C"
+{
+#include "SDL_Log.h"
+}
 
 
 ShadowMap::ShadowMap()
@@ -35,7 +39,7 @@ bool ShadowMap::Init(unsigned int width, unsigned int height)
 
 	if (status != GL_FRAMEBUFFER_COMPLETE)
 	{
-		printf("Framebuffer error: %s\n", status);
+		SDL_Log("Framebuffer error: %s\n", status);
 		return false;
 	}
 

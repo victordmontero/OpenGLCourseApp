@@ -1,22 +1,17 @@
 #include "Window.h"
 
-Window::Window()
-{
-	width = 800;
-	height = 600;
-	xChange = 0.0f;
-	yChange = 0.0f;
-
-	for (size_t i = 0; i < 1024; i++)
-	{
-		keys[i] = 0;
-	}
-}
-
 Window::Window(GLint windowWidth, GLint windowHeight)
+	: mainWindow(nullptr),
+	context(nullptr),
+	joystick(nullptr),
+	width(windowWidth),
+	height(windowHeight),
+	axes(nullptr),
+	buttons(nullptr),
+	initialJoystickAxisValue(0),
+	players(-1),
+	shouldClose(false)
 {
-	width = windowWidth;
-	height = windowHeight;
 	xChange = 0.0f;
 	yChange = 0.0f;
 
@@ -28,104 +23,84 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 
 int Window::Initialise()
 {
-	if (!glfwInit())
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
-		printf("Error Initialising GLFW");
-		glfwTerminate();
+		SDL_Log("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		return 1;
 	}
 
 	// Setup GLFW Windows Properties
 	// OpenGL version
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	// Core Profile
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	// Allow forward compatiblity
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
 	// Create the window
-	mainWindow = glfwCreateWindow(width, height, "Test Window", NULL, NULL);
-	if (!mainWindow)
+	mainWindow = SDL_CreateWindow("Test Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+
+	context = SDL_GL_CreateContext(mainWindow);
+
+	if (context == nullptr) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create OpenGL context: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
+	SDL_Log("GL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+
+	if (mainWindow == nullptr)
 	{
-		printf("Error creating GLFW window!");
-		glfwTerminate();
+		SDL_Log("Main window not initialized! SDL_Error: %s\n", SDL_GetError());
 		return 1;
 	}
 
 	// Get buffer size information
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
+	SDL_GetWindowSize(mainWindow, &bufferWidth, &bufferHeight);
 
-	// Set the current context
-	glfwMakeContextCurrent(mainWindow);
-
-	// Handle Key + Mouse Input
-	createCallbacks();
-	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	// Allow modern extension access
-	glewExperimental = GL_TRUE;
-
-	GLenum error = glewInit();
-	if (error != GLEW_OK)
-	{
-		printf("Error: %s", glewGetErrorString(error));
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
-	}
+	SDL_GL_SetSwapInterval(-1);
 
 	glEnable(GL_DEPTH_TEST);
 
 	// Create Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);
-
-	glfwSetWindowUserPointer(mainWindow, this);
-	glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, this);
-}
-
-void Window::createCallbacks()
-{
-	glfwSetKeyCallback(mainWindow, handleKeys);
-	glfwSetCursorPosCallback(mainWindow, handleMouse);
-	glfwSetJoystickCallback(handleJoystickConnected);
 }
 
 const unsigned char* Window::getButtons()
 {
-	const unsigned char* buttons = NULL;;
-	if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+	if (this->joystick != nullptr && SDL_JoystickGetAttached(this->joystick))
 	{
-		int buttonCount = 0;
-		int stickCount = 0;
-
-		buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
-
-		if (buttons[GLFW_GAMEPAD_BUTTON_CROSS] == GLFW_PRESS)
+		for (int i = 0; i < buttonCount; i++)
 		{
-			glfwSetWindowShouldClose(mainWindow, GL_TRUE);
+			//SDL_Log("button %d is %d\n", i, buttons[i]);
+			buttons[i] = SDL_JoystickGetButton(joystick, i);
 		}
-		/*for (int i = 0; i < buttonCount; i++)
+
+		if (buttons[SDL_CONTROLLER_BUTTON_X] == 1)
 		{
-			printf("button %d is %d\n", i, buttons[i]);
+			shouldClose = true;
 		}
-		printf("\n");*/
 	}
+
 	return buttons;
 }
 
 const float* Window::getAxes()
 {
-	int axesCount;
-	axes = NULL;;
-	if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+	if (this->joystick != nullptr && SDL_JoystickGetAttached(this->joystick))
 	{
-		axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-		/*for (int i = 0; i < axesCount; i++)
+		for (int i = 0; i < axesCount; i++)
 		{
-			printf("axe %d is %.3f\n", i, axes[i]);
-		}*/
+			const float axisValue = SDL_JoystickGetAxis(joystick, i);
+			short axisValueInitialValue = 0;
+			SDL_JoystickGetAxisInitialState(joystick, i, &axisValueInitialValue);
+			axes[i] = fabsf(axisValue) > fabs(axisValueInitialValue) ? axisValue * 0.005f : 0;
+			//SDL_Log("axe %d is %.3f\n", i, axes[i]);
+		}
 	}
+
 	return axes;
 }
 
@@ -143,31 +118,28 @@ GLfloat Window::getYChange()
 	return theChange;
 }
 
-void Window::handleKeys(GLFWwindow* window, int key, int code, int action, int mode)
+void Window::handleKeys(Window* theWindow, int key, int code, int action, int mode)
 {
-	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	if (key == SDL_KeyCode::SDLK_ESCAPE && action == SDL_KEYDOWN)
 	{
-		glfwSetWindowShouldClose(window, GL_TRUE);
+		theWindow->shouldClose = true;
 	}
 
 	if (key >= 0 && key < 1024)
 	{
-		if (action == GLFW_PRESS)
+		if (action == SDL_KEYDOWN)
 		{
 			theWindow->keys[key] = true;
 		}
-		else if (action == GLFW_RELEASE)
+		else if (action == SDL_KEYUP)
 		{
 			theWindow->keys[key] = false;
 		}
 	}
 }
 
-void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
+void Window::handleMouse(Window* theWindow, double xPos, double yPos)
 {
-	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
 	if (theWindow->mouseFirstMoved)
 	{
@@ -179,13 +151,18 @@ void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
 	theWindow->xChange = xPos - theWindow->lastX;
 	theWindow->yChange = theWindow->lastY - yPos;
 
+	//SDL_Log("xChanged %f , yChanged %f\n", theWindow->xChange, theWindow->yChange);
+
 	theWindow->lastX = xPos;
 	theWindow->lastY = yPos;
 }
 
 void Window::pollJoystickAxes()
 {
-	if (axes == NULL)
+	short axisXInitialValue = 0;
+	short axisYInitialValue = 0;
+
+	if (axes == nullptr)
 		return;
 
 	if (joystickFirstMoved)
@@ -195,37 +172,143 @@ void Window::pollJoystickAxes()
 		joystickFirstMoved = false;
 	}
 
-	float axisX = axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
-	float axisY = axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+	float axisX = axes[SDL_CONTROLLER_AXIS_RIGHTX];
+	float axisY = axes[SDL_CONTROLLER_AXIS_RIGHTY];
 
-	xChange = fabsf(axisX) > fabsf(0.5f) ? axisX*0.08f : 0;
-	yChange = fabsf(axisY) > fabsf(0.5f) ? axisY*0.08f : 0;
+	xChange = axisX * 0.08f;
+	yChange = axisY * 0.08f;
 
 }
 
-void Window::handleJoystickConnected(int joy, int event)
+void Window::handleJoystickConnected(Window* window, int joy, int event)
 {
-	if (glfwJoystickPresent(joy))
-	{
-		Window* window = static_cast<Window*>(glfwGetJoystickUserPointer(joy));
-	}
 
-	if (event == GLFW_CONNECTED)
+	if (event == SDL_JOYDEVICEADDED)
 	{
-		printf("Joystick %s[%d] connected\n", glfwGetJoystickName(joy), joy);
+		window->joystick = SDL_JoystickOpen(joy);
+		if (window->joystick == nullptr)
+		{
+			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Joystick %u error opening [%s]\n", joy, SDL_GetError());
+			return;
+		}
+
+		if (SDL_JoystickGetAttached(window->joystick)) {
+			SDL_JoystickSetPlayerIndex(window->joystick, ++(window->players));
+
+			SDL_Log("Joystick %s[%d] connected\n", SDL_JoystickName(window->joystick), static_cast<int>(SDL_JoystickInstanceID(window->joystick)));
+			SDL_Log("Player index [%d]\n", SDL_JoystickGetPlayerIndex(window->joystick));
+
+			window->buttonCount = SDL_JoystickNumButtons(window->joystick);
+			window->buttons = new unsigned char[window->buttonCount] {0};
+
+			window->axesCount = SDL_JoystickNumAxes(window->joystick);
+			window->axes = new float[window->axesCount] {0};
+
+			SDL_Log("Joystick button count [%d]\n", window->buttonCount);
+			SDL_Log("Joystick axis count [%d]\n", window->axesCount);
+
+			if (SDL_JoystickHasRumble(window->joystick))
+			{
+				SDL_JoystickRumble(window->joystick, 500, 500, 1000);
+			}
+
+			if (SDL_JoystickHasLED(window->joystick))
+			{
+				SDL_JoystickSetLED(window->joystick, 0, 255, 255);
+			}
+		}
 	}
-	else if (event == GLFW_DISCONNECTED)
+	else if (event == SDL_JOYDEVICEREMOVED)
 	{
-		printf("Joystick %s[%d] disconnected\n", glfwGetJoystickName(joy), joy);
+		SDL_Log("Joystick %s[%d] disconnected\n", SDL_JoystickName(window->joystick), static_cast<int>(SDL_JoystickInstanceID(window->joystick)));
+		SDL_JoystickClose(window->joystick);
+		window->joystick = nullptr;
+		window->players = ((window->players - 1) < 0) ? -1 : window->players--;
+
+		delete[] window->axes;
+		delete[] window->buttons;
+
+		window->axes = nullptr;
+		window->buttons = nullptr;
+
+		window->axesCount = 0;
+		window->buttonCount = 0;
 	}
 	else
 	{
-		printf("Joystick event %d\n", event);
+		SDL_Log("Joystick event %d\n", event);
 	}
+
+
 }
 
 Window::~Window()
 {
-	glfwDestroyWindow(mainWindow);
-	glfwTerminate();
+	if (this->joystick != nullptr && SDL_JoystickGetAttached(this->joystick)) {
+		delete[] axes;
+		delete[] buttons;
+	}
+
+	SDL_GL_DeleteContext(context);
+	SDL_DestroyWindow(mainWindow);
+	SDL_Quit();
+}
+
+void Window::handleEvents()
+{
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			SDL_Log("Window quit");
+			shouldClose = true;
+			break;
+
+		case SDL_KEYDOWN:
+			SDL_Log("SDL_KEYDOWN %u %u", event.key.keysym.sym, event.key.keysym.scancode);
+			handleKeys(this, event.key.keysym.sym, event.key.keysym.scancode, event.key.type, event.key.keysym.mod);
+			break;
+
+		case SDL_KEYUP:
+			SDL_Log("SDL_KEYUP %u %u", event.key.keysym.sym, event.key.keysym.scancode);
+			handleKeys(this, event.key.keysym.sym, event.key.keysym.scancode, event.key.type, event.key.keysym.mod);
+			break;
+
+		case SDL_MOUSEMOTION:
+			SDL_Log("SDL_MOUSEMOTION x: %ld,  y:%ld", event.motion.x, event.motion.y);
+			handleMouse(this, event.motion.x, event.motion.y);
+			break;
+
+		case SDL_MOUSEWHEEL:
+			SDL_Log("SDL_MOUSEWHEEL");
+			break;
+
+		case SDL_JOYAXISMOTION:
+		case SDL_CONTROLLERAXISMOTION:
+			SDL_Log("SDL_CONTROLLERAXISMOTION Axis %d, Value %d",
+				event.jaxis.axis, event.jaxis.value);
+			break;
+		case SDL_JOYBUTTONUP:
+			SDL_Log("SDL_JOYBUTTONUP  %d", event.jbutton.button);
+			break;
+		case SDL_JOYBUTTONDOWN:
+			SDL_Log("SDL_JOYBUTTONDOWN %d", event.jbutton.button);
+			break;
+
+		case SDL_JOYDEVICEREMOVED:
+			SDL_Log("SDL_JOYDEVICEREMOVED  %d", event.jbutton.which);
+			handleJoystickConnected(this, event.jdevice.which, event.jdevice.type);
+			break;
+
+		case SDL_JOYDEVICEADDED:
+			SDL_Log("SDL_JOYDEVICEADDED  %d", event.jbutton.which);
+			handleJoystickConnected(this, event.jdevice.which, event.jdevice.type);
+			break;
+
+		default:
+			break;
+		}
+	}
 }

@@ -1,11 +1,15 @@
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
+
+extern "C"
+{
+#include <glad/gl.h>
+}
+
 #include <string>
 #include <iostream>
 #include <fstream>
-
-#include <GL\glew.h>
 
 #include <glm\gtc\type_ptr.hpp>
 

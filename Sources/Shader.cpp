@@ -1,5 +1,10 @@
 #include "Shader.h"
 
+extern "C"
+{
+#include <SDL_log.h>
+}
+
 Shader::Shader()
 {
 	shaderID = 0;
@@ -43,7 +48,7 @@ std::string Shader::ReadFile(const char* fileLocation)
 	std::ifstream fileStream(fileLocation, std::ios::in);
 
 	if (!fileStream.is_open()) {
-		printf("Failed to read %s! File doesn't exist.", fileLocation);
+		SDL_Log("Failed to read %s! File doesn't exist.", fileLocation);
 		return "";
 	}
 
@@ -64,7 +69,7 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 
 	if (!shaderID)
 	{
-		printf("Error creating shader program!\n");
+		SDL_Log("Error creating shader program!\n");
 		return;
 	}
 
@@ -80,7 +85,7 @@ void Shader::CompileShader(const char * vertexCode, const char * geometryCode, c
 
 	if (!shaderID)
 	{
-		printf("Error creating shader program!\n");
+		SDL_Log("Error creating shader program!\n");
 		return;
 	}
 
@@ -101,7 +106,7 @@ void Shader::Validate()
 	if (!result)
 	{
 		glGetProgramInfoLog(shaderID, sizeof(eLog), NULL, eLog);
-		printf("Error validating program: '%s'\n", eLog);
+		SDL_Log("Error validating program: '%s'\n", eLog);
 		return;
 	}
 }
@@ -116,7 +121,7 @@ void Shader::CompileProgram()
 	if (!result)
 	{
 		glGetProgramInfoLog(shaderID, sizeof(eLog), NULL, eLog);
-		printf("Error linking program: '%s'\n", eLog);
+		SDL_Log("Error linking program: '%s'\n", eLog);
 		return;
 	}
 
@@ -380,7 +385,7 @@ void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderT
 	if (!result)
 	{
 		glGetShaderInfoLog(theShader, sizeof(eLog), NULL, eLog);
-		printf("Error compiling the %d shader: '%s'\n", shaderType, eLog);
+		SDL_Log("Error compiling the %d shader: '%s'\n", shaderType, eLog);
 		return;
 	}
 

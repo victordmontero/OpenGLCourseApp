@@ -1,7 +1,12 @@
 #pragma once
 
 #include<cstring>
-#include <GL/glew.h>
+
+extern "C"
+{
+#include <glad/gl.h>
+}
+
 #include "CommonDefs.h"
 
 class Texture

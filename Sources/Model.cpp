@@ -1,6 +1,9 @@
 #include "Model.h"
 
-
+extern "C"
+{
+#include <SDL2/SDL_log.h>
+}
 
 Model::Model()
 {
@@ -13,7 +16,7 @@ void Model::LoadModel(const std::string & fileName)
 
 	if (!scene)
 	{
-		printf("Model %s failed to load: %s\n", fileName, importer.GetErrorString());
+		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Model %s failed to load: %s\n", fileName.c_str(), importer.GetErrorString());
 		return;
 	}
 
@@ -117,7 +120,7 @@ void Model::LoadMaterials(const aiScene * scene)
 
 				if (!textureList[i]->LoadTexture())
 				{
-					printf("Failed to load texture at %s\n", texPath.c_str());
+					SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture at %s\n", texPath.c_str());
 					delete textureList[i];
 					textureList[i] = nullptr;
 				}

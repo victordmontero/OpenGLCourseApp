@@ -1,6 +1,9 @@
 #include "OmniShadowMap.h"
 
-
+extern "C"
+{
+#include "SDL_Log.h"
+}
 
 OmniShadowMap::OmniShadowMap() :ShadowMap()
 {
@@ -37,7 +40,7 @@ bool OmniShadowMap::Init(unsigned int width, unsigned int height)
 
 	if (status != GL_FRAMEBUFFER_COMPLETE)
 	{
-		printf("Framebuffer error: %s\n", status);
+		SDL_Log("Framebuffer error: %s\n", status);
 		return false;
 	}
 

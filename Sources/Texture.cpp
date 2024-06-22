@@ -1,6 +1,9 @@
 #include "Texture.h"
 
-
+extern "C"
+{
+#include <SDL2/SDL_log.h>
+}
 
 Texture::Texture()
 {
@@ -31,7 +34,7 @@ bool Texture::LoadTexture()
 	unsigned char* data = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
 	if (!data)
 	{
-		printf("Failed to find: %s\n", fileLocation);
+		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to find: %s\n", fileLocation);
 		return false;
 	}
 
@@ -57,7 +60,7 @@ bool Texture::LoadTextureA()
 	unsigned char* data = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
 	if (!data)
 	{
-		printf("Failed to find: %s\n", fileLocation);
+		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to find: %s\n", fileLocation);
 		return false;
 	}
 

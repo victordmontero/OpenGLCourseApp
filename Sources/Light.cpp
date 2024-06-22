@@ -1,7 +1,5 @@
 #include "Light.h"
 
-
-
 Light::Light()
 {
 	color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -26,8 +24,3 @@ void Light::UseLight(GLuint ambientIntensityLoc, GLuint ambientColorLoc, GLuint 
 	glUniform1f(ambientIntensityLoc, ambientIntensity);
 	glUniform1f(diffuseIntensityLoc, diffuseIntensity);
 }
-
-
-//Light::~Light()
-//{
-//}

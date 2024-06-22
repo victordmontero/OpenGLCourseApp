@@ -1,6 +1,9 @@
 #include "Skybox.h"
 
-
+extern "C"
+{
+#include <SDL2/SDL_log.h>
+}
 
 Skybox::Skybox()
 {
@@ -25,7 +28,7 @@ Skybox::Skybox(std::vector<std::string> faceLocations)
 		unsigned char* data = stbi_load(faceLocations[i].c_str(), &width, &height, &bitDepth, 0);
 		if (!data)
 		{
-			printf("Failed to find: %s\n", faceLocations[i].c_str());
+			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to find: %s\n", faceLocations[i].c_str());
 			return;
 		}
 
@@ -88,7 +91,7 @@ void Skybox::DrawSkyBox(glm::mat4 view, glm::mat4 projection)
 
 	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
-	
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 

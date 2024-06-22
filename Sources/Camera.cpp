@@ -1,3 +1,9 @@
+
+extern "C"
+{
+#include <SDL2/SDL.h>
+}
+
 #include "Camera.h"
 
 Camera::Camera() {}
@@ -20,22 +26,22 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 {
 	GLfloat velocity = moveSpeed * deltaTime;
 
-	if (keys[GLFW_KEY_W])
+	if (keys[SDLK_e])
 	{
 		position += front * velocity;
 	}
 
-	if (keys[GLFW_KEY_S])
+	if (keys[SDLK_d])
 	{
 		position -= front * velocity;
 	}
 
-	if (keys[GLFW_KEY_A])
+	if (keys[SDLK_s])
 	{
 		position -= right * velocity;
 	}
 
-	if (keys[GLFW_KEY_D])
+	if (keys[SDLK_f])
 	{
 		position += right * velocity;
 	}
@@ -49,45 +55,46 @@ void Camera::joyStickControl(const unsigned char* buttons, const float* axes, GL
 
 	GLfloat velocity = moveSpeed * deltaTime;
 
-	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] == GLFW_PRESS)
+	if (buttons[SDL_CONTROLLER_BUTTON_DPAD_UP] == SDL_TRUE)
 	{
 		position += front * velocity;
 	}
 
-	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] == GLFW_PRESS)
+	if (buttons[SDL_CONTROLLER_BUTTON_DPAD_DOWN] == SDL_TRUE)
 	{
 		position -= front * velocity;
 	}
 
-	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] == GLFW_PRESS)
+	if (buttons[SDL_CONTROLLER_BUTTON_DPAD_LEFT] == SDL_TRUE)
 	{
 		position -= right * velocity;
 	}
 
-	if (buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] == GLFW_PRESS)
+	
+	if (buttons[SDL_CONTROLLER_BUTTON_DPAD_RIGHT] == SDL_TRUE)
 	{
 		position += right * velocity;
 	}
 
-	if (axes == NULL)
+	if (axes == nullptr)
 		return;
 
-	if (axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.5f)
+	if (axes[SDL_CONTROLLER_AXIS_LEFTY] < -1.5f)
 	{
 		position += front * velocity;
 	}
 
-	if (axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.5f)
+	if (axes[SDL_CONTROLLER_AXIS_LEFTY] > 1.5f)
 	{
 		position -= front * velocity;
 	}
 
-	if (axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.5f)
+	if (axes[SDL_CONTROLLER_AXIS_LEFTX] < -1.5f)
 	{
 		position -= right * velocity;
 	}
 
-	if (axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.5f)
+	if (axes[SDL_CONTROLLER_AXIS_LEFTX] > 1.5f)
 	{
 		position += right * velocity;
 	}

@@ -1,13 +1,16 @@
 #define STB_IMAGE_IMPLEMENTATION
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
+
+extern "C"
+{
+#include <glad/gl.h>
+#include <SDL2/SDL.h>
+}
+
 #include <cmath>
 #include <vector>
-
-#include <GL\glew.h>
-#include <GLFW\glfw3.h>
-
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
@@ -27,7 +30,7 @@
 
 #include "Skybox.h"
 
-const float toRadians = 3.14159265f / 180.0f;
+constexpr float toRadians = 3.14159265f / 180.0f;
 
 GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformPosition = 0,
 uniformSpecularIntensity = 0, uniformShininess = 0, uniformOmniLightPos = 0, uniformFarPlane = 0;
@@ -70,7 +73,7 @@ static const char* vShader = "Shaders/vertex.shader";
 // Fragment Shader
 static const char* fShader = "Shaders/fragment.shader";
 
-void calcAvgNormals(unsigned int * indices, unsigned int indiceCount, GLfloat * vertices, unsigned int verticeCount,
+void calcAvgNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
 	unsigned int vLength, unsigned int normalOffset)
 {
 	for (size_t i = 0; i < indiceCount; i += 3)
@@ -130,28 +133,30 @@ void CreateObjects()
 
 	calcAvgNormals(indices, 12, vertices, 32, 8, 5);
 
-	Mesh *obj1 = new Mesh();
+	Mesh* obj1 = new Mesh();
 	obj1->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj1);
 
-	Mesh *obj2 = new Mesh();
+	Mesh* obj2 = new Mesh();
 	obj2->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj2);
 
-	Mesh *obj3 = new Mesh();
+	Mesh* obj3 = new Mesh();
 	obj3->CreateMesh(floorVertices, floorIndices, 32, 6);
 	meshList.push_back(obj3);
 }
 
 void CreateShaders()
 {
-	Shader *shader1 = new Shader();
+	Shader* shader1 = new Shader();
 	shader1->CreateFromFiles(vShader, fShader);
 	shaderList.push_back(*shader1);
 
 	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_vertex.shader", "Shaders/directional_shadow_fragment.shader");
-	omniShadowShader.CreateFromFiles("Shaders/omni_shadow_map_vertex.shader",
-		"Shaders/omni_shadow_map_geometry.shader", "Shaders/omni_shadow_map_fragment.shader");
+	omniShadowShader.CreateFromFiles(
+		"Shaders/omni_shadow_map_vertex.shader",
+		"Shaders/omni_shadow_map_geometry.shader",
+		"Shaders/omni_shadow_map_fragment.shader");
 }
 
 void RenderScene()
@@ -290,7 +295,7 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	RenderScene();
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	mainWindow = Window(1024, 768);
 	mainWindow.Initialise();
@@ -298,7 +303,7 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
+	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.03f, 0.5f);
 
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
@@ -379,24 +384,23 @@ int main()
 	// Loop until window closed
 	while (!mainWindow.getShouldClose())
 	{
-		GLfloat now = glfwGetTime(); // SDL_GetPerformanceCounter();
-		deltaTime = now - lastTime; // (now - lastTime)*1000/SDL_GetPerformanceFrequency();
+		GLfloat now = SDL_GetPerformanceCounter();
+		deltaTime = (now - lastTime) * 1000 / SDL_GetPerformanceFrequency();
 		lastTime = now;
 
 		// Get + Handle User Input
-		glfwPollEvents();
+		mainWindow.handleEvents();
+		mainWindow.pollJoystickAxes();
 
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
-		//system("CLS");
 		camera.joyStickControl(mainWindow.getButtons(), mainWindow.getAxes(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
-		mainWindow.pollJoystickAxes();
 
-		if (mainWindow.getsKeys()[GLFW_KEY_L])
+		if (mainWindow.getsKeys()[SDLK_l] || (mainWindow.getButtons() != nullptr && mainWindow.getButtons()[SDL_CONTROLLER_BUTTON_Y] == 1))
 		{
 			spotLights[0].Toogle();
-			mainWindow.getsKeys()[GLFW_KEY_L] = false;
+			mainWindow.getsKeys()[SDLK_l] = false;
 		}
 
 		DirectionalShadowMapPass(&ambientLight);

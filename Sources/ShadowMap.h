@@ -1,7 +1,11 @@
 #pragma once
 
 #include <cstdio>
-#include <GL/glew.h>
+
+extern "C"
+{
+#include <glad/gl.h>
+}
 
 class ShadowMap
 {
