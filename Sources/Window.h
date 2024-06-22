@@ -1,69 +1,81 @@
 #pragma once
 
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
 
 extern "C"
 {
+#include <SDL.h>
 #include <glad/gl.h>
-#include <SDL2/SDL.h>
-#include <SDL_opengl.h>
 }
 
 class Window
 {
-public:
+  public:
+    Window(GLint windowWidth = 800, GLint windowHeight = 600);
+    ~Window();
 
-	Window(GLint windowWidth = 800, GLint windowHeight = 600);
-	~Window();
+    int Initialise();
+    void destroy();
 
-	int Initialise();
+    GLint getBufferWidth()
+    {
+        return bufferWidth;
+    }
+    GLint getBufferHeight()
+    {
+        return bufferHeight;
+    }
 
-	GLint getBufferWidth() { return bufferWidth; }
-	GLint getBufferHeight() { return bufferHeight; }
+    bool getShouldClose()
+    {
+        return shouldClose;
+    }
 
-	bool getShouldClose() { return shouldClose; }
+    bool* getsKeys()
+    {
+        return keys;
+    }
+    const unsigned char* getButtons();
+    const float* getAxes();
+    GLfloat getXChange();
+    GLfloat getYChange();
 
-	bool* getsKeys() { return keys; }
-	const unsigned char* getButtons();
-	const float* getAxes();
-	GLfloat getXChange();
-	GLfloat getYChange();
+    void pollJoystickAxes();
 
-	void pollJoystickAxes();
+    void swapBuffers()
+    {
+        SDL_GL_SwapWindow(mainWindow);
+    }
 
-	void swapBuffers() {
-		SDL_GL_SwapWindow(mainWindow);
+    void handleEvents();
 
-	}
+  private:
+    SDL_Window* mainWindow;
+    SDL_GLContext context;
+    SDL_Joystick* joystick;
 
-	void handleEvents();
+    GLint width, height;
+    GLint bufferWidth, bufferHeight;
 
-private:
-	SDL_Window* mainWindow;
-	SDL_GLContext context;
-	SDL_Joystick* joystick;
+    bool keys[1024];
+    float* axes;
+    unsigned char* buttons;
 
-	GLint width, height;
-	GLint bufferWidth, bufferHeight;
+    GLfloat lastX;
+    GLfloat lastY;
+    GLfloat xChange;
+    GLfloat yChange;
+    int buttonCount;
+    int axesCount;
+    short initialJoystickAxisValue;
+    char players;
+    bool mouseFirstMoved;
+    bool joystickFirstMoved;
+    bool shouldClose;
 
-	bool keys[1024];
-	float* axes;
-	unsigned char* buttons;
-
-	GLfloat lastX;
-	GLfloat lastY;
-	GLfloat xChange;
-	GLfloat yChange;
-	int buttonCount;
-	int axesCount;
-	short initialJoystickAxisValue;
-	char players;
-	bool mouseFirstMoved;
-	bool joystickFirstMoved;
-	bool shouldClose;
-
-	static void handleKeys(Window* window, int key, int code, int action, int mode);
-	static void handleMouse(Window* window, double xPos, double yPos);
-	static void handleJoystickConnected(Window* window, int joy, int event);
+    static void handleKeys(Window* window, int key, int code, int action,
+                           int mode);
+    static void handleMouse(Window* window, double xPos, double yPos);
+    static void handleJoystickConnected(Window* window, int joy, int event);
 };

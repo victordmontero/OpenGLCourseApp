@@ -2,9 +2,8 @@
 
 extern "C"
 {
-#include "SDL_Log.h"
+#include <SDL_log.h>
 }
-
 
 ShadowMap::ShadowMap()
 {

@@ -1,11 +1,12 @@
 workspace "OpenGLCourseApp"
    configurations { "Debug", "Release" }
-   location("build.%{_ACTION}")
+   platforms { "Linux", "Win64" }
+   location("proj_%{_ACTION}")
 
     project "OpenGLCourseApp"
        kind "WindowedApp"
        language "C++"
-       cppdialect "C++11"
+       cppdialect "C++14"
        targetdir "bin/%{cfg.buildcfg}"
 
        files {
@@ -15,35 +16,55 @@ workspace "OpenGLCourseApp"
            "*.lua"
         }
 
-        defines{"GLEW_STATIC"}
-
         includedirs{
             "include",
             "depend/glm",
             "depend/glad/include",
             "depend/sdl/include",
-            "depend/sdl/build/include",
-            "glfw-master/include",
-            "glew-2.1.0/include",
+            --"depend/sdl/build/include",
             "depend/assimp/include",
             "depend/assimp/build/include"
         }
 
-    --    libdirs {
-     --       "depend/glad/lib/Debug",
-     --       "depend/sdl/build/Debug",
-    --    }
-
-        links{
-              "opengl32.lib",
-              "SDL2lib",
-              "Assimp",
-              "glad",
-              "glad.lib"
+        libdirs {
+              "depend/glad/lib",
         }
 
-        architecture "x64"
-        system "windows"
+        links{
+            "SDL2lib",
+            "assimplib",
+            "gladlib"
+        }
+
+       filter "platforms:Win64"
+           defines{"WIN32", "WIN64"}
+           architecture "x64"
+
+       filter "platforms:Win*"
+          system "windows"
+          links{
+              "opengl32.lib",
+              "glad.lib"
+          }
+
+       filter  "platforms:Linux"
+           defines{"LINUX"}
+           system "linux"
+
+           libdirs {
+              "depend/assimp/build/lib",
+		          "depend/assimp/build/contrib/zlib",
+              "depend/sdl/build",
+              --"depend/glad/lib",
+           }
+
+           links{
+              "zlibstaticd",
+              "z",
+              "SDL2",
+              "assimpd",
+              "glad",
+            }
 
        filter "configurations:Debug"
           defines { "DEBUG" }
@@ -53,22 +74,6 @@ workspace "OpenGLCourseApp"
             "depend/sdl/build/include-config-debug"
           }
       
-          libdirs {
-              --"../glfw-master/lib/Release",
-              --"../glew-2.1.0/lib/Release/Win32",
-              "depend/assimp/build/lib/Debug",
-              "depend/sdl/build/Debug",
-              "depend/glad/lib/Debug",
-          }
-      
-          links{
-              "opengl32.lib",
-              --"glew32s.lib",
-              --"glfw3.lib",
-              "assimp-vc143-mtd.lib", -- TODO: infer msvc version instead,
-              "SDL2maind.lib",
-              "SDL2d.lib",
-          }
 
        filter "configurations:Release"
           defines { "NDEBUG" }
@@ -78,28 +83,39 @@ workspace "OpenGLCourseApp"
             "depend/sdl/build/include-config-release"
           }
 
-          libdirs {
-              "../glfw-master/lib/Release",
-              "../glew-2.1.0/lib/Release/Win32",
-              "depend/assimp/build/lib/Release",
-              "depend/sdl/build/Release",
-              "depend/glad/lib/Release",
+
+       filter {"configurations:Debug", "platforms:Win*"}
+
+           libdirs {
+              "depend/assimp/build/lib/Debug",
+              "depend/sdl/build/Debug",
           }
 
           links{
-              "opengl32.lib",
-              --"glew32s.lib",
-              --"glfw3.lib",
-              "assimp-vc143-mt.lib", -- TODO: infer msvc version instead
-              "SDL2main.lib",
-              "SDL2.lib",
+              "assimp-vc143-mtd.lib",
+              "SDL2maind.lib",
+              "SDL2d.lib"
           }
 
-    project "glad"
+       filter {"configurations:Release", "platforms:Win*"}
+
+           libdirs {
+              "depend/assimp/build/lib/Release",
+              "depend/sdl/build/Release",
+           }
+
+           links{
+              "assimp-vc143-mt.lib",
+              "SDL2main.lib",
+              "SDL2.lib"
+          }
+
+    project "gladlib"
        kind "StaticLib"
        language "C"
        location("depend/glad/")
-       targetdir "depend/glad/lib/%{cfg.buildcfg}"
+       targetdir "depend/glad/lib"
+       targetname "glad"
 
        files {
            "depend/glad/**.h*",
@@ -111,8 +127,14 @@ workspace "OpenGLCourseApp"
             "depend/glad/include",
         }
 
-        architecture "x64"
-        system "windows"
+       filter  "platforms:Win64"
+           defines{"WIN32", "WIN64"}
+           architecture "x64"
+           system "windows"
+
+       filter  "platforms:Linux"
+           defines{"LINUX"}
+           system "linux"
 
        filter "configurations:Debug"
           defines { "DEBUG" }
@@ -122,8 +144,7 @@ workspace "OpenGLCourseApp"
           defines { "NDEBUG" }
           optimize "On"
 
-
-    project "Assimp"
+    project "assimplib"
        kind "Makefile"
        objdir()
    
@@ -131,37 +152,58 @@ workspace "OpenGLCourseApp"
        includedirs{"./include"}
        targetname "assimp"
 
+
+	     cmake_opt = " -DASSIMP_BUILD_ZLIB=ON -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_TESTS=OFF "
+
        cleancommands {
 	       "{RMDIR} %{prj.location}/build/"
        }
    
+--       filter "configurations:Debug"
+--		    targetdir "%{prj.location}/build"
+--   
+--       buildcommands {
+--          "cmake %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF -DASSIMP_INSTALL=OFF -DBUILD_SHARED_LIBS=OFF",
+--	      "cmake --build %{cfg.targetdir} "
+--       }
+--   
+--       rebuildcommands {
+--	       "{RMDIR} %{prj.location}/build/",
+--	       "cmake %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF -DBUILD_SHARED_LIBS=OFF",
+--	       "cmake --build %{cfg.targetdir} "
+--       }
+--   
+--       filter "configurations:Release"
+--		    targetdir "%{prj.location}/build"
+--   
+--       buildcommands {
+--	       "cmake -DCMAKE_BUILD_TYPE=Release %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF -DASSIMP_BUILD_TESTS=OFF -DASSIMP_INSTALL=OFF -DBUILD_SHARED_LIBS=OFF",
+--	       "cmake --build %{cfg.targetdir}  --config Release"
+--       }
+--   
+--       rebuildcommands {
+--	       "{RMDIR} %{prj.location}/build/",
+--	       "cmake -DCMAKE_BUILD_TYPE=Release %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF -DASSIMP_BUILD_TESTS=OFF -DASSIMP_INSTALL=OFF -DBUILD_SHARED_LIBS=OFF",
+--	       "cmake --build %{cfg.targetdir}  --config Release"
+--       }
+
+
+      	buildcommands {
+      	  "cmake -DCMAKE_BUILD_TYPE=%{cfg.buildcfg}" .. cmake_opt .. "%{prj.location} -B %{cfg.targetdir}",
+      		"cmake --build %{cfg.targetdir} --config %{cfg.buildcfg}"
+      	}
+      	
+      	rebuildcommands {
+      		"{RMDIR} %{prj.location}/out/",
+      	  "cmake -DCMAKE_BUILD_TYPE=%{cfg.buildcfg}" .. cmake_opt .. "%{prj.location} -B %{cfg.targetdir}",
+      		"cmake --build %{cfg.targetdir} --config %{cfg.buildcfg}"
+      	}
+
+
        filter "configurations:Debug"
 		    targetdir "%{prj.location}/build"
-   
-       buildcommands {
-          "cmake %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF",
-	      "cmake --build %{cfg.targetdir} --parallel 7"
-       }
-   
-       rebuildcommands {
-	       "{RMDIR} %{prj.location}/build/",
-	       "cmake %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF",
-	       "cmake --build %{cfg.targetdir} --parallel 7"
-       }
-   
        filter "configurations:Release"
 		    targetdir "%{prj.location}/build"
-   
-       buildcommands {
-	       "cmake -DCMAKE_BUILD_TYPE=Release %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF",
-	       "cmake --build %{cfg.targetdir} --config Release"
-       }
-   
-       rebuildcommands {
-	       "{RMDIR} %{prj.location}/build/",
-	       "cmake -DCMAKE_BUILD_TYPE=Release %{prj.location} -B %{cfg.targetdir} -DASSIMP_WARNINGS_AS_ERRORS=OFF",
-	       "cmake --build %{cfg.targetdir} --config Release"
-       }
 
 
    project "SDL2lib"
@@ -172,34 +214,25 @@ workspace "OpenGLCourseApp"
        includedirs{"./include"}
        targetname "SDL2"
 
+       cmake_opt = " -DBUILD_SHARED_LIBS=OFF -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DSDL_WAYLAND=OFF "
+
        cleancommands {
-	       "{RMDIR} %{prj.location}/build/"
+         "{RMDIR} %{prj.location}/build/"
        }
-   
-       filter "configurations:Debug"
-		    targetdir "%{prj.location}/build"
-   
+ 
        buildcommands {
-          "cmake %{prj.location} -B %{cfg.targetdir}",
-	       "cmake --build %{cfg.targetdir}"
+         "cmake -DCMAKE_BUILD_TYPE=%{cfg.buildcfg}" .. cmake_opt .. "%{prj.location} -B %{cfg.targetdir}",
+      	 "cmake --build %{cfg.targetdir} --config %{cfg.buildcfg}"
        }
-   
+       
        rebuildcommands {
-	       "{RMDIR} %{prj.location}/build/",
-	       "cmake %{prj.location} -B %{cfg.targetdir}",
-	       "cmake --build %{cfg.targetdir}"
+         "{RMDIR} %{prj.location}/build/",
+         "cmake -DCMAKE_BUILD_TYPE=%{cfg.buildcfg}" .. cmake_opt .. "%{prj.location} -B %{cfg.targetdir}",
+      	 "cmake --build %{cfg.targetdir} --config %{cfg.buildcfg}"
        }
-   
-       filter "configurations:Release"
-		    targetdir "%{prj.location}/build"
-   
-       buildcommands {
-	       "cmake -DCMAKE_BUILD_TYPE=Release %{prj.location} -B %{cfg.targetdir}",
-	       "cmake --build %{cfg.targetdir} --config Release"
-       }
-   
-       rebuildcommands {
-	       "{RMDIR} %{prj.location}/build/",
-	       "cmake -DCMAKE_BUILD_TYPE=Release %{prj.location} -B %{cfg.targetdir}",
-	       "cmake --build %{cfg.targetdir} --config Release"
-       }
+      
+      filter "configurations:Debug"
+          targetdir "%{prj.location}/build"
+      filter "configurations:Release"
+          targetdir "%{prj.location}/build"
+      	

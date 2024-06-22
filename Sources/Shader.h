@@ -11,7 +11,7 @@ extern "C"
 #include <iostream>
 #include <fstream>
 
-#include <glm\gtc\type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "CommonDefs.h"
 

@@ -2,7 +2,7 @@
 
 extern "C"
 {
-#include "SDL_Log.h"
+#include <SDL_log.h>
 }
 
 OmniShadowMap::OmniShadowMap() :ShadowMap()
