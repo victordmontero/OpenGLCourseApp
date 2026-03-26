@@ -74,8 +74,8 @@ class Window
     bool joystickFirstMoved;
     bool shouldClose;
 
+    void handleMouse(Window* window, double xPos, double yPos);
     static void handleKeys(Window* window, int key, int code, int action,
                            int mode);
-    static void handleMouse(Window* window, double xPos, double yPos);
     static void handleJoystickConnected(Window* window, int joy, int event);
 };

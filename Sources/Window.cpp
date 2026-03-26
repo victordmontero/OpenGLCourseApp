@@ -69,6 +69,8 @@ int Window::Initialise()
 
     SDL_Log("Viewport created %u, %u", bufferWidth, bufferHeight);
 
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
     return 0;
 }
 
@@ -181,6 +183,9 @@ void Window::handleMouse(Window* theWindow, double xPos, double yPos)
 
     theWindow->lastX = xPos;
     theWindow->lastY = yPos;
+
+    SDL_WarpMouseInWindow(mainWindow, static_cast<int>(xPos) % bufferWidth-2,
+                          static_cast<int>(yPos) % bufferHeight-2);
 }
 
 void Window::pollJoystickAxes()

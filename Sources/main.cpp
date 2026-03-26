@@ -241,7 +241,6 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 
 void OmniShadowMapPass(PointLight* light)
 {
-
     glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(),
                light->GetShadowMap()->GetShadowHeight());
     omniShadowShader.UseShader();
